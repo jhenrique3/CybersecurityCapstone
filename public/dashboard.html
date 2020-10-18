@@ -1,0 +1,118 @@
+<html>
+    <head>
+        <title>Login Here</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    </head>
+    <body class="container">
+        <div class="page-header">
+            <h1>Simple Message system</h1>
+        </div>
+
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/dashboard">Dashboard</a></li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/logout">Log Out</a></li>
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+        <div class="container row">
+           <h1>Hi, Welcome to your Dashboard</h1>
+           <br />
+           <table id="Tmessages" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Sender</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Sent at</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+           </table>
+        </div>
+        <div id="divMessage" class="container row">
+            <div class="btn-toolbar">
+                <button id="btnClose" type="button" class="btn btn-primary btn-lg pull-right" onclick="location.href='/dashboard';">Close Message</button>
+                <button id="btnDelete" type="button" class="btn btn-warning btn-lg pull-right">Delete Message</button>
+            </div>
+            <br />
+            <table id="Tmessage" class="table table-striped">
+            <thead>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row" width="20%">Sender</th>
+                    <td id="ColSender" width="80%"></td>
+                </tr>
+                <tr>
+                    <th scope="row" width="20%">Sent at</th>
+                    <td id="ColSent" width="80%"></td>
+                </tr>                
+                <tr>
+                    <th scope="row" width="20%">Subject</th>
+                    <td id="ColSubject" width="80%"></td>
+                </tr>
+                <tr>
+                    <th scope="row" width="20%">Message</th>
+                    <td id="ColMessage" width="80%"></td>
+                </tr>
+            </tbody>
+           </table>
+        </div>
+        <script>
+            let table = document.getElementById('Tmessages');
+            let divMessage = document.getElementById('divMessage');
+
+            getMessages();
+
+// Functions
+            async function getMessages() {
+                fetch('/messages')
+                    .then(response => response.json())
+                    .then(data => addRows(data))
+                    .catch(err => console.log('error: ' + err))
+            }
+
+            async function getMessage(id) {
+                fetch(`/message/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        table.style.display = "none";
+                        divMessage.style.display = "block";
+                        document.getElementById("ColSender").innerText = data.sender;
+                        document.getElementById("ColSent").innerText = data.createdAt;
+                        document.getElementById("ColSubject").innerText = data.subject;
+                        document.getElementById("ColMessage").innerText = data.message;
+                    })
+                    .catch(err => console.log('error: ' + err))
+            }
+
+            function addRows(data){
+                if (!data) return;
+                let tbody = table.getElementsByTagName('tbody')[0];
+
+                data.forEach(message => {
+                    let tr = tbody.insertRow();
+                    let td1 = tr.insertCell();
+                    let td2 = tr.insertCell();
+                    let td3 = tr.insertCell();
+
+                    td1.innerText = message.sender;
+                    td2.innerHTML = '<a id="Message' + message.msgId + '" onclick="getMessage(' + message.msgId + ')">' + message.subject + '</a>';
+                    td3.innerText = message.createdAt;
+                    divMessage.style.display = "none";
+                });
+            }
+
+        </script>
+    </body>
+</html>
